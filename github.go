@@ -16,29 +16,27 @@ const (
 	pageTimeout = 30 * time.Second
 )
 
-// newGitHubClient creates a new GitHub client with token from environment
-func newGitHubClient() *github.Client {
-	token := os.Getenv("GITHUB_TOKEN")
+// newGithubClient creates a new GitHub client with token from environment
+func newGithubClient() *github.Client {
+	token, ok := os.LookupEnv("GITHUB_TOKEN")
+	if !ok {
+		fmt.Println("GITHUB_TOKEN environment variable not set")
+		return nil
+	}
+
 	return github.NewClient(nil).WithAuthToken(token)
 }
 
-// fetchReadmeContent retrieves README.md content from GitHub
 func fetchReadmeContent(client *github.Client) (string, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), pageTimeout)
 	defer cancel()
 
-	fileContent, _, _, err := client.Repositories.GetContents(
-		ctx,
-		repoOwner,
-		repoName,
-		readmeFile,
-		nil,
-	)
+	readmeContent, _, err := client.Repositories.GetReadme(ctx, repoOwner, repoName, nil)
 	if err != nil {
 		return "", fmt.Errorf("error fetching repository contents: %w", err)
 	}
 
-	content, err := fileContent.GetContent()
+	content, err := readmeContent.GetContent()
 	if err != nil {
 		return "", fmt.Errorf("error extracting content: %w", err)
 	}
@@ -64,8 +62,11 @@ func renderMarkdown(client *github.Client, content string) (string, error) {
 	return output, nil
 }
 
-func getHomePage(client *github.Client) (*Page, error) {
-	// Fetch and render the markdown content
+// TODO: This function should fetch every pages from the root and subdirectories
+// If the file is equal to README it should be considered as the home page
+// Otherwise, it should be considered as a subpage.
+func getPages(client *github.Client) (*Page, error) {
+
 	content, err := fetchReadmeContent(client)
 	if err != nil {
 		return nil, err

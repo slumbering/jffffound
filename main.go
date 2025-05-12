@@ -13,9 +13,9 @@ const (
 
 func main() {
 	// Initialize GitHub client
-	githubClient := newGitHubClient()
+	githubClient := newGithubClient()
 
-	page, err := getHomePage(githubClient)
+	page, err := getPages(githubClient)
 	if err != nil {
 		log.Fatalf("Failed to generate homepage: %v", err)
 	}
@@ -27,7 +27,7 @@ func main() {
 	http.HandleFunc("/", homeHandler)
 
 	// Start the server
-	log.Printf("Server listening on %s...", serverPort)
+	log.Printf("Server listening on port %s", serverPort)
 	err = http.ListenAndServe(serverPort, nil)
 	if err != nil {
 		log.Fatalf("Server error: %v", err)
