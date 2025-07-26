@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>use-dynamic-viewport-unit.md</title>
+        <link rel="stylesheet" href="/static/css/mvp.css" />
+    </head>
+    <body>
+        <header>
+            <h1>use-dynamic-viewport-unit.md</h1>
+        </header>
+
+        <aside>
+            
+            <li>
+                <a href="/page/test-go.html">test-go</a>
+            </li>
+            
+            <li>
+                <a href="/page/test-js.html">test-js</a>
+            </li>
+            
+            <li>
+                <a href="/page/use-dynamic-viewport-unit.html">use-dynamic-viewport-unit</a>
+            </li>
+            
+        </aside>
+
+        <main>
+            <div class="container"><h1 dir="auto">Use the new dvh unit for better viewport height handling</h1>
+<p dir="auto">Maybe for some of you (like me), dvh, standing for "dynamic viewport height", sounds like a new unit of measurement, but it is not.<br>
+It is a new way to measure the viewport height. The dvh unit is a dynamic viewport height unit that takes into account the size of the browser's address bar and other UI elements that may affect the viewport size. This comes very handy when you are working with mobile devices, as the address bar can take up a significant amount of space on the screen.</p>
+<h2 dir="auto">How to use dvh</h2>
+<p dir="auto">To use dvh, you can simply replace the vh unit with dvh in your CSS. For example, if you want to set the height of an element to 50% of the viewport height, you can use the following code:</p>
+<div class="highlight highlight-source-css" dir="auto"><pre class="notranslate">.<span class="pl-c1">element</span> {
+  <span class="pl-c1">height</span><span class="pl-kos">:</span> <span class="pl-c1">50<span class="pl-smi">dvh</span></span>;
+}</pre></div>
+<p dir="auto">This will set the height of the element to 50% of the dynamic viewport height, which will adjust automatically as the address bar and other UI elements change size.</p>
+<h2 dir="auto">Browser support</h2>
+<p dir="auto">The dvh unit is supported in most modern browsers, including Chrome, Firefox, and Safari.<br>
+You can check the current browser support for dvh on <a href="https://caniuse.com/mdn-css_types_length_viewport_percentage_units_dynamic" rel="nofollow">Can I Use</a>.</p></div>
+        </main>
+
+        <footer>
+            <p>&copy; 2025 - Today I Learned</p>
+        </footer>
+    </body>
+</html>

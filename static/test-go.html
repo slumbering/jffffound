@@ -3,24 +3,32 @@
     <head>
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>{{ .Title }}</title>
+        <title>test-go.md</title>
         <link rel="stylesheet" href="/static/css/mvp.css" />
     </head>
     <body>
         <header>
-            <h1>{{ .Title }}</h1>
+            <h1>test-go.md</h1>
         </header>
 
         <aside>
-            {{ range $key, $value := .Pages }}
+            
             <li>
-                <a href="/page/{{ $value }}">{{ $key }}</a>
+                <a href="/page/test-go.html">test-go</a>
             </li>
-            {{ end }}
+            
+            <li>
+                <a href="/page/test-js.html">test-js</a>
+            </li>
+            
+            <li>
+                <a href="/page/use-dynamic-viewport-unit.html">use-dynamic-viewport-unit</a>
+            </li>
+            
         </aside>
 
         <main>
-            <div class="container">{{ .Content }}</div>
+            <div class="container"><h1 dir="auto">test go</h1></div>
         </main>
 
         <footer>

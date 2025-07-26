@@ -15,16 +15,16 @@ func main() {
 	// Initialize GitHub client
 	githubClient := newGithubClient()
 
-	page, err := getPages(githubClient)
+	_, err := getPages(githubClient)
 	if err != nil {
 		log.Fatalf("Failed to generate homepage: %v", err)
 	}
-	log.Printf("Generated %s.html successfully", page.Title)
 
 	fs := http.FileServer(http.Dir(staticDir))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
 	http.HandleFunc("/", homeHandler)
+	http.HandleFunc("/page/", pageHandler)
 
 	// Start the server
 	log.Printf("Server listening on port %s", serverPort)

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // Page represents an HTML page with a title and body content
@@ -14,7 +15,8 @@ type Page struct {
 
 // save writes the page content to a file in the static directory
 func (p *Page) save() error {
-	filename := p.Title + ".html"
+	sourceFileName := strings.TrimSuffix(p.Title, filepath.Ext(p.Title))
+	filename := sourceFileName + ".html"
 	filePath := filepath.Join(staticDir, filename)
 
 	// Ensure the static directory exists

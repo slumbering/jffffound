@@ -12,11 +12,9 @@ import (
 const (
 	repoOwner   = "slumbering"
 	repoName    = "til"
-	readmeFile  = "README.md"
 	pageTimeout = 30 * time.Second
 )
 
-// newGithubClient creates a new GitHub client with token from environment
 func newGithubClient() *github.Client {
 	token, ok := os.LookupEnv("GITHUB_TOKEN")
 	if !ok {
@@ -27,21 +25,52 @@ func newGithubClient() *github.Client {
 	return github.NewClient(nil).WithAuthToken(token)
 }
 
-func fetchReadmeContent(client *github.Client) (string, error) {
-	ctx, cancel := context.WithTimeout(context.Background(), pageTimeout)
-	defer cancel()
-
-	readmeContent, _, err := client.Repositories.GetReadme(ctx, repoOwner, repoName, nil)
+func fetchRepoContent(client *github.Client, path string) (*Page, error) {
+	ctx := context.Background()
+	_, repoContent, resp, err := client.Repositories.GetContents(ctx, repoOwner, repoName, path, nil)
 	if err != nil {
-		return "", fmt.Errorf("error fetching repository contents: %w", err)
+		return nil, fmt.Errorf("error fetching directory contents: %w", err)
+	}
+	if resp.StatusCode != 200 {
+		return nil, fmt.Errorf("error fetching directory contents: %s", resp.Status)
 	}
 
-	content, err := readmeContent.GetContent()
-	if err != nil {
-		return "", fmt.Errorf("error extracting content: %w", err)
+	for _, content := range repoContent {
+		if content.GetType() == "file" {
+			file, _, _, err := client.Repositories.GetContents(ctx, repoOwner, repoName, content.GetPath(), nil)
+			fileContent, err := file.GetContent()
+
+			if err != nil {
+				fmt.Println("Error extracting file content:", err)
+				return nil, err
+			}
+			html, err := renderMarkdown(client, fileContent)
+
+			if err != nil {
+				fmt.Println("Error rendering markdown:", err)
+				return nil, err
+			}
+			renderedHTML, err := renderWithLayout(*content.Name, html)
+			if err != nil {
+				return nil, fmt.Errorf("template rendering failed: %w", err)
+			}
+			newPage(*content.Name, renderedHTML)
+		}
+		if content.GetType() == "dir" {
+			subPage, err := fetchRepoContent(client, content.GetPath())
+			if err != nil {
+				return nil, fmt.Errorf("error fetching subdirectory contents: %w", err)
+			}
+			if subPage != nil {
+				fmt.Println("Subpage found:", subPage.Title)
+				return subPage, nil
+			}
+		} else {
+			fmt.Println("Skipping unsupported content type:", content.GetType(), "for", content.GetName())
+		}
 	}
 
-	return content, nil
+	return nil, nil
 }
 
 // renderMarkdown converts markdown content to HTML
@@ -62,26 +91,12 @@ func renderMarkdown(client *github.Client, content string) (string, error) {
 	return output, nil
 }
 
-// TODO: This function should fetch every pages from the root and subdirectories
-// If the file is equal to README it should be considered as the home page
-// Otherwise, it should be considered as a subpage.
 func getPages(client *github.Client) (*Page, error) {
 
-	content, err := fetchReadmeContent(client)
+	repoContent, err := fetchRepoContent(client, "")
 	if err != nil {
 		return nil, err
 	}
 
-	html, err := renderMarkdown(client, content)
-	if err != nil {
-		return nil, err
-	}
-
-	// Wrap the HTML content in our layout template
-	renderedHTML, err := renderWithLayout("Today I Learned", html)
-	if err != nil {
-		return nil, fmt.Errorf("template rendering failed: %w", err)
-	}
-
-	return newPage("home", renderedHTML)
+	return repoContent, nil
 }
