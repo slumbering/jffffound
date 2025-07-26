@@ -14,7 +14,7 @@
         <aside>
             {{ range $key, $value := .Pages }}
             <li>
-                <a href="/page/{{ $value }}">{{ $key }}</a>
+                <a href="/{{ $value }}">{{ $key }}</a>
             </li>
             {{ end }}
         </aside>
