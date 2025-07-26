@@ -23,8 +23,7 @@ func main() {
 	fs := http.FileServer(http.Dir(staticDir))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	http.HandleFunc("/", homeHandler)
-	http.HandleFunc("/page/", pageHandler)
+	http.HandleFunc("/", pageHandler)
 
 	// Start the server
 	log.Printf("Server listening on port %s", serverPort)
