@@ -4,7 +4,7 @@
         <meta charset="UTF-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1.0" />
         <title>{{ .Title }}</title>
-        <link rel="stylesheet" href="/css/mvp.css" />
+        <link rel="stylesheet" href="/css/pico.classless.min.css" />
     </head>
     <body>
         <header>
@@ -12,11 +12,13 @@
         </header>
 
         <aside>
-            {{ range $key, $value := .Pages }}
-            <li>
-                <a href="/{{ $value }}">{{ $key }}</a>
-            </li>
-            {{ end }}
+            <ul>
+                {{ range .Menu }} {{ if .Category }} {{ if not .Item }}
+                <li class="category"><strong>{{ .Category }}</strong></li>
+                {{ else }}
+                <li><a href="/{{ .Path }}">{{ .Item }}</a></li>
+                {{ end }} {{ end }} {{ end }}
+            </ul>
         </aside>
 
         <main>

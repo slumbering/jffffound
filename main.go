@@ -2,8 +2,13 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"path/filepath"
+
+	cp "github.com/otiai10/copy"
 )
 
 const (
@@ -12,6 +17,11 @@ const (
 )
 
 func main() {
+	// Ensure static directory exists
+	createStaticDir()
+	// Copy CSS directory to static
+	copyCSSDir()
+
 	// Initialize GitHub client
 	githubClient := newGithubClient()
 
@@ -31,4 +41,25 @@ func main() {
 	if err != nil {
 		log.Fatalf("Server error: %v", err)
 	}
+}
+
+/**
+ * createStaticDir ensures the static directory exists
+ */
+func createStaticDir() error {
+	if err := os.MkdirAll(staticDir, 0755); err != nil {
+		return fmt.Errorf("failed to create static directory: %w", err)
+	}
+	return nil
+}
+
+func copyCSSDir() error {
+	sourceDir := "./css"
+	destDir := filepath.Join(staticDir, "css")
+	err := cp.Copy(sourceDir, destDir)
+	if err != nil {
+		return fmt.Errorf("failed to copy CSS directory: %w", err)
+	}
+
+	return nil
 }

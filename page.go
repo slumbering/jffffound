@@ -19,11 +19,6 @@ func (p *Page) save() error {
 	filename := sourceFileName + ".html"
 	filePath := filepath.Join(staticDir, filename)
 
-	// Ensure the static directory exists
-	if err := os.MkdirAll(staticDir, 0755); err != nil {
-		return fmt.Errorf("failed to create static directory: %w", err)
-	}
-
 	return os.WriteFile(filePath, p.Body, 0600)
 }
 

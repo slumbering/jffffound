@@ -3,52 +3,79 @@ package main
 import (
 	"bytes"
 	"html/template"
-	"os"
-	"path/filepath"
 	"strings"
 )
+
+type Menu struct {
+	Category string
+	Item     string
+	Path     string
+}
 
 // TemplateData holds data to be passed to templates
 type TemplateData struct {
 	Title   string
 	Content template.HTML
-	Pages   map[string]string // Map of page names to file names
+	Menu    []Menu
 }
 
-func renderWithLayout(title string, content string) ([]byte, error) {
-	// Parse the manually created layout template
+func renderWithLayout(documents []Document) (*Page, error) {
 	tmpl, err := template.ParseFiles("templates/layout.html")
 	if err != nil {
 		return nil, err
 	}
 
-	//list of html pages within the static directory
-	pagePaths := staticDir + "/" // List all HTML files in the static directory
-	files, err := os.ReadDir(pagePaths)
-	if err != nil {
-		return nil, err
+	menu := buildMenu(documents)
+
+	for _, document := range documents {
+		if document.isCategory {
+			continue
+		}
+
+		data := TemplateData{
+			Title: document.title,
+			Menu:  menu,
+		}
+
+		if document.content != nil {
+			data.Content = template.HTML(*document.content)
+		}
+
+		// Render the template
+		var buf bytes.Buffer
+		if err := tmpl.Execute(&buf, data); err != nil {
+			return nil, err
+		}
+
+		newPage(document.title, buf.Bytes())
 	}
-	// Create a map to hold the page names
-	pageNames := make(map[string]string)
-	for _, file := range files {
-		if !file.IsDir() && filepath.Ext(file.Name()) == ".html" && file.Name() != "README.html" {
-			// Use the file name without extension as the key
-			pageName := strings.TrimSuffix(file.Name(), filepath.Ext(file.Name()))
-			pageNames[pageName] = file.Name() // Store the full file name
+
+	return nil, nil
+}
+
+func buildMenu(documents []Document) []Menu {
+	menu := make([]Menu, 0)
+	var currentCategory string
+
+	for _, doc := range documents {
+		if doc.isCategory {
+			// It's a category/directory
+			currentCategory = doc.title
+			menu = append(menu, Menu{
+				Category: currentCategory,
+				Item:     "", // No item for category header
+			})
+		} else {
+			// It's a file/item
+			itemPath := strings.TrimSuffix(doc.title, ".md") + ".html"
+			itemName := strings.TrimSuffix(doc.title, ".md")
+			menu = append(menu, Menu{
+				Category: currentCategory, // Group under current category
+				Item:     itemName,
+				Path:     itemPath,
+			})
 		}
 	}
-	// Prepare template data
-	data := TemplateData{
-		Title:   title,
-		Content: template.HTML(content),
-		Pages:   pageNames,
-	}
 
-	// Render the template
-	var buf bytes.Buffer
-	if err := tmpl.Execute(&buf, data); err != nil {
-		return nil, err
-	}
-
-	return buf.Bytes(), nil
+	return menu
 }
